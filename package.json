@@ -1,0 +1,12 @@
+{
+  "name": "playlit",
+  "version": "1.0.0",
+  "description": "Search playlists that feature a song and build a list of the top tracks out of the result",
+  "main": "app.js",
+  "author": "Gali Armero",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.16.3",
+    "querystring": "^0.2.0"
+  }
+}
