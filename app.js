@@ -20,6 +20,9 @@ const generateRandomString = function(length) {
     return text;
 };
 
+const CLIENT_CREDENTIALS = Buffer.from(config.CLIENT_ID + ':' + config.CLIENT_SECRET)
+                                    .toString('base64');
+
 app.get('/login', function(req, res) {
     const scope = 'user-read-private user-read-email';
     let state = generateRandomString(16);
@@ -42,21 +45,33 @@ app.get('/callback', function(req, res) {
         res.render('error', {error});
     }
 
-    requestOptions = {
+    let requestOptions = {
         form: {
             grant_type: 'authorization_code',
             code: req.query.code,
             redirect_uri: config.REDIRECT_URI
         },
         headers: {
-            'Authorization': `Basic ${Buffer.from(config.CLIENT_ID + ':' + config.CLIENT_SECRET).toString('base64')}`
-        }
+            'Authorization': `Basic ${CLIENT_CREDENTIALS}`
+        },
+        json: true
     }
 
     request.post('https://accounts.spotify.com/api/token', requestOptions,
         function(err, httpResponse, body) {
             if (!err) {
-                console.log("body: %j", body);
+                let options = {
+                    headers: {
+                        'Authorization': `Bearer ${body.access_token}`
+                    },
+                    json: true
+                }
+
+                request.get('https://api.spotify.com/v1/me', options,
+                    function(err, httpResponse, body) {
+                        console.log("body: %j", body);
+                    }
+                );
             }
         }
     );
