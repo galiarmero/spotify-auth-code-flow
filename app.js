@@ -1,6 +1,7 @@
 const express = require('express');
 const querystring = require('querystring');
 const hbs = require('hbs');
+const request = require('request');
 const config = require('./config.json');
 const app = express();
 
@@ -40,6 +41,26 @@ app.get('/callback', function(req, res) {
     if (error !== null) {
         res.render('error', {error});
     }
+
+    requestOptions = {
+        form: {
+            grant_type: 'authorization_code',
+            code: req.query.code,
+            redirect_uri: config.REDIRECT_URI
+        },
+        headers: {
+            'Authorization': `Basic ${Buffer.from(config.CLIENT_ID + ':' + config.CLIENT_SECRET).toString('base64')}`
+        }
+    }
+
+    request.post('https://accounts.spotify.com/api/token', requestOptions,
+        function(err, httpResponse, body) {
+            if (!err) {
+                console.log("body: %j", body);
+            }
+        }
+    );
+
 });
 
 app.listen(8888);
