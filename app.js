@@ -1,7 +1,13 @@
 const express = require('express');
 const querystring = require('querystring');
-const config = require('./config.json')
+const hbs = require('hbs');
+const config = require('./config.json');
 const app = express();
+
+app.set('view engine', 'html');
+app.set('views', __dirname + '/public');
+app.engine('html', hbs.__express);
+app.use(express.static(__dirname + '/public'));
 
 const generateRandomString = function(length) {
     let text = '';
@@ -12,8 +18,6 @@ const generateRandomString = function(length) {
     }
     return text;
 };
-
-app.use(express.static(__dirname + '/public'));
 
 app.get('/login', function(req, res) {
     const scope = 'user-read-private user-read-email';
@@ -28,6 +32,14 @@ app.get('/login', function(req, res) {
                         scope: scope,
                         show_dialog: true
                     }));
+});
+
+app.get('/callback', function(req, res) {
+    const error = req.query.error || null;
+
+    if (error !== null) {
+        res.render('error', {error});
+    }
 });
 
 app.listen(8888);
