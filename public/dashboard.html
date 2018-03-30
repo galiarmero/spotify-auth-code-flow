@@ -2,17 +2,37 @@
     <head>
         <title>Spotify - Authorization Demo</title>
         <style>
-            .label {
-                width: 100px;
-                font-size: 16px;
-
+            .bold {
+                font-weight: 800;
+            }
+            section {
+                display: inline-block;
             }
         </style>
     </head>
     <body>
         <h1>Profile</h1>
-        <img src="{{profile.images.0.url}}" />
-        <h4>{{profile.display_name}}</h4>
-        <span>{{profile.email}}, {{profile.country}}</span>
+        <section class='img-container'>
+            <img src="{{profile.images.0.url}}" />
+        </section>
+        <section>
+            <div>
+                <span class='bold'>
+                    <a href="{{profile.external_urls.spotify}}">{{profile.display_name}}</a>
+                </span>
+            </div>
+            <div><span>{{profile.email}}, {{profile.country}}</span></div>
+            <div><span>{{profile.followers.total}} followers</span></div>
+        </section>
+
+        <h1>Tokens</h1>
+        <div>
+            <div class='bold'>Access Token</div>
+            <input type='text' value="{{tokens.access_token}}" size="64" readonly />
+        </div>
+        <div>
+            <div class='bold'>Refresh Token</div>
+            <input type='text' value="{{tokens.refresh_token}}" size="64" readonly />
+        </div>
     </body>
 </html>
