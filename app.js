@@ -19,6 +19,8 @@ const generateRandomString = function(length) {
     }
     return text;
 };
+const CLIENT_CREDENTIALS = `${config.CLIENT_ID}:${config.CLIENT_SECRET}`;
+const CLIENT_AUTHORIZATION = Buffer.from(CLIENT_CREDENTIALS).toString('base64');
 
 app.get('/login', function(req, res) {
     const scope = 'user-read-private user-read-email';
@@ -42,7 +44,6 @@ app.get('/callback', function(req, res) {
         res.render('error', {error});
     }
 
-    const client_credentials = `${config.CLIENT_ID}:${config.CLIENT_SECRET}`
     let requestOptions = {
         form: {
             grant_type: 'authorization_code',
@@ -50,7 +51,7 @@ app.get('/callback', function(req, res) {
             redirect_uri: config.REDIRECT_URI
         },
         headers: {
-            'Authorization': `Basic ${Buffer.from(client_credentials).toString('base64')}`
+            'Authorization': `Basic ${CLIENT_AUTHORIZATION}`
         },
         json: true
     }
@@ -72,7 +73,34 @@ app.get('/callback', function(req, res) {
             }
         }
     );
+});
 
+app.get('/refresh_token', function(req, res) {
+    const refresh_token = req.query.refresh_token || null;
+
+    if (refresh_token === null) {
+        res.status(400).send("Missing refresh token");
+    }
+
+    let requestOptions = {
+        form: {
+            grant_type: 'refresh_token',
+            refresh_token
+        },
+        headers: {
+            'Authorization': `Basic ${CLIENT_AUTHORIZATION}`
+        },
+        json: true
+    }
+
+    request.post('https://accounts.spotify.com/api/token', requestOptions,
+        function(err, httpResponse, tokens) {
+            if (err) {
+                res.status(500).send(err);
+            }
+            res.json(tokens);
+        }
+    );
 });
 
 app.listen(8888);

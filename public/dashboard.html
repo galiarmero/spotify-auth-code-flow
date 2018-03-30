@@ -9,6 +9,7 @@
                 display: inline-block;
             }
         </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     </head>
     <body>
         <h1>Profile</h1>
@@ -28,11 +29,39 @@
         <h1>Tokens</h1>
         <div>
             <div class='bold'>Access Token</div>
-            <input type='text' value="{{tokens.access_token}}" size="64" readonly />
+            <input id='access-token' type='text' value="{{tokens.access_token}}" size="64" readonly />
         </div>
         <div>
             <div class='bold'>Refresh Token</div>
-            <input type='text' value="{{tokens.refresh_token}}" size="64" readonly />
+            <input id='refresh-token' type='text' value="{{tokens.refresh_token}}" size="64" readonly />
         </div>
+        <div>
+            <button id='request-new-token' type='button'>Get Refreshed Access Token</button>
+            <span id='fetching' style='display: none'>Obtaining new access token...</span>
+            <span id='error-msg' style='display: none; color: red'>
+                Unable to obtain new access token
+            </span>
+        </div>
+
+        <script>
+            (function() {
+                $('#request-new-token').on('click', function() {
+                    $('#fetching').show();
+                    $('#error-msg').hide();
+                    $.ajax({
+                        url: '/refresh_token',
+                        data: {
+                            'refresh_token': $('#refresh-token').val()
+                        }
+                    }).done(function(data) {
+                        $('#access-token').val(data.access_token);
+                    }).fail(function(err) {
+                        $('#error-msg').show();
+                    }).always(function() {
+                        $('#fetching').hide();
+                    });
+                });
+            })();
+        </script>
     </body>
 </html>
